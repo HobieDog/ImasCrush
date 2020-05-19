@@ -92,11 +92,14 @@ public class GameManager : MonoBehaviour
 
                 if (beOverlap)
                 {
+                    //Tile Remove
                     int val = CheckTagWithEnum(board[i, j].tag);
                     DestroyObject(board[i, j]);
 
+                    //Change New Tile
                     Vector3 pos = new Vector3(j * space - start_x, i * create_y + start_y, 0.0f);
                     board[i, j] = Instantiate(characters[val], pos, Quaternion.identity);
+
                     Color color = board[i, j].GetComponent<SpriteRenderer>().color;
                     board[i, j].GetComponent<SpriteRenderer>().color = new Vector4(color.r, color.g, color.b, 0.0f);
                     board[i, j].GetComponent<CharacterBox>().SetArr(i, j);
@@ -119,6 +122,7 @@ public class GameManager : MonoBehaviour
         return randCharacter;
     }
 
+    //Fade In Effect
     IEnumerator FadeIn()
     {
         while (board[6, 6].GetComponent<SpriteRenderer>().color.a != 1.0f)
@@ -137,5 +141,60 @@ public class GameManager : MonoBehaviour
     public GameObject[,] GetCharacterTile()
     {
         return board;
+    }
+
+    //Check Tiles
+    public bool CheckCharacter(int row, int column, int dirV, int dirH, string type)
+    {
+        Queue<GameObject> queueW = new Queue<GameObject>();
+        Queue<GameObject> queueH = new Queue<GameObject>();
+        bool L, R, U, D, result1, result2;
+        result1 = result2 = L = R = U = D = false;
+
+        queueW.Enqueue(board[row - dirV, column - dirH]);
+        queueH.Enqueue(board[row - dirV, column - dirH]);
+
+        // 맞는 짝을 상,하 탐색한다
+        for (int i = 1; i < 7; ++i)
+        {
+            if (!R && column + i < 7 && board[row, column + i].tag == type)
+                queueW.Enqueue(board[row, column + i]);
+            else
+                R = true;
+            if (!L && column - i >= 0 && board[row, column - i].tag == type)
+                queueW.Enqueue(board[row, column - i]);
+            else
+                L = true;
+            if (!U && row + i < 7 && board[row + i, column].tag == type)
+                queueH.Enqueue(board[row + i, column]);
+            else
+                U = true;
+            if (!D && row - i >= 0 && board[row - i, column].tag == type)
+                queueH.Enqueue(board[row - i, column]);
+            else
+                D = true;
+        }
+
+        Debug.Log("cnt1 : " + queueW.Count);
+        Debug.Log("cnt2 : " + queueH.Count);
+
+        if (queueW.Count >= 3)
+        {
+            while (queueW.Count > 0)
+            {
+                queueW.Dequeue().GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
+            }
+            result1 = true;
+        }
+
+        if (queueH.Count >= 3)
+        {
+            while (queueH.Count > 0)
+            {
+                queueH.Dequeue().GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
+            }
+            result2 = true;
+        }
+        return result1 || result2;
     }
 }

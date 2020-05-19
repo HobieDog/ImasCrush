@@ -13,15 +13,18 @@ public class CharacterBox : MonoBehaviour
     BoxCollider2D boxCollider;
     Vector3 originPos;
 
-    float horizontal = 0;
-    float vertical = 0;
+    int dirV = 0;
+    int dirH = 0;
     int row, column;
     bool beClicked = false;
     bool fix = false;
+    float vertical = 0;
+    float horizontal = 0;
 
     void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
         originPos = transform.position;
     }
@@ -31,28 +34,50 @@ public class CharacterBox : MonoBehaviour
 
     }
 
+    void Switching()
+    {
+        GameObject ChangeTile = gameManager.GetCharacterTile()[row + dirV, column + dirH];
+
+        //Change Tile
+        transform.position = ChangeTile.GetComponent<CharacterBox>().GetOriginPos();
+        ChangeTile.transform.position = originPos;
+
+        //Tiles OriginPos Reset
+        originPos = transform.position;
+        ChangeTile.GetComponent<CharacterBox>().SetOriginPos(ChangeTile.transform.position);
+
+        //Change Board Array
+        GameObject tempObj = gameManager.GetCharacterTile()[row, column];
+        gameManager.GetCharacterTile()[row, column] = ChangeTile;
+        gameManager.GetCharacterTile()[row + dirV, column + dirH] = tempObj;
+
+        gameManager.GetCharacterTile()[row, column].GetComponent<CharacterBox>().SetArr(row, column);
+        gameManager.GetCharacterTile()[row + dirV, column + dirH].GetComponent<CharacterBox>().SetArr(row + dirV, column + dirH);
+    }
+
     private void OnMouseUp()
     {
+        bool bOne = false;
+        bool bTwo = false;
+
         //좌우 이동
-        if(horizontal != 0)
+        if (horizontal != 0)
         {
             //절반이상 이동했다면
             if(originPos.x + drag_range / drag_range_split < transform.position.x || originPos.x - drag_range / drag_range_split > transform.position.x)
             {
-                transform.position = gameManager.GetCharacterTile()[row, column + (int)(horizontal / horizontal)].GetComponent<CharacterBox>().GetOriginPos();
-                gameManager.GetCharacterTile()[row, column + (int)(horizontal / horizontal)].transform.position = originPos;
+                GameObject ChangeTile = gameManager.GetCharacterTile()[row, column + dirH];
 
-                originPos = transform.position;
-                gameManager.GetCharacterTile()[row, column + (int)(horizontal / horizontal)].GetComponent<CharacterBox>().SetOriginPos(
-                   gameManager.GetCharacterTile()[row, column + (int)(horizontal / horizontal)].transform.position);
+                bTwo = gameManager.CheckCharacter(row, column + dirH, dirV, dirH, transform.tag);
+                bOne = gameManager.CheckCharacter(row, column, 0, 0, ChangeTile.tag);
 
-                // board 배열의 위치를 바꾼다.
-                GameObject tempObj = gameManager.GetCharacterTile()[row, column];
-                gameManager.GetCharacterTile()[row, column] = gameManager.GetCharacterTile()[row, column + (int)(horizontal / horizontal)];
-                gameManager.GetCharacterTile()[row, column + (int)(horizontal / horizontal)] = tempObj;
-
-                gameManager.GetCharacterTile()[row, column].GetComponent<CharacterBox>().SetArr(row, column - (int)(horizontal / horizontal));
-                gameManager.GetCharacterTile()[row, column + (int)(horizontal / horizontal)].GetComponent<CharacterBox>().SetArr(row, column + (int)(horizontal / horizontal));
+                if((bOne || bTwo) == false)
+                {
+                    transform.position = originPos;
+                    fix = false;
+                    return;
+                }
+                Switching();
             }
             //아니라면
             else
@@ -62,24 +87,23 @@ public class CharacterBox : MonoBehaviour
             }
         }
 
+        //상하
         else if(vertical != 0)
         {
             if(originPos.y + drag_range / drag_range_split < transform.position.y || originPos.y - drag_range / drag_range_split > transform.position.y)
             {
-                transform.position = gameManager.GetCharacterTile()[row + (int)(vertical / vertical), column].GetComponent<CharacterBox>().GetOriginPos();
-                gameManager.GetCharacterTile()[row + (int)(vertical / vertical), column].transform.position = originPos;
+                GameObject ChangeTile = gameManager.GetCharacterTile()[row + dirV, column];
 
-                originPos = transform.position;
-                gameManager.GetCharacterTile()[row + (int)(vertical / vertical), column].GetComponent<CharacterBox>().SetOriginPos(
-                   gameManager.GetCharacterTile()[row + (int)(vertical / vertical), column].transform.position);
+                bTwo = gameManager.CheckCharacter(row + dirV, column, dirV, dirH, transform.tag);
+                bOne = gameManager.CheckCharacter(row, column, 0, 0, ChangeTile.tag);
 
-                // board 배열의 위치를 바꾼다.
-                GameObject tempObj = gameManager.GetCharacterTile()[row, column];
-                gameManager.GetCharacterTile()[row, column] = gameManager.GetCharacterTile()[row + (int)(vertical / vertical), column];
-                gameManager.GetCharacterTile()[row + (int)(vertical / vertical), column] = tempObj;
-
-                gameManager.GetCharacterTile()[row, column].GetComponent<CharacterBox>().SetArr(row - (int)(vertical / vertical), column);
-                gameManager.GetCharacterTile()[row + (int)(vertical / vertical), column].GetComponent<CharacterBox>().SetArr(row + (int)(vertical / vertical), column);
+                if ((bOne || bTwo) == false)
+                {
+                    transform.position = originPos;
+                    fix = false;
+                    return;
+                }
+                Switching();
             }
             else
             {
@@ -96,8 +120,8 @@ public class CharacterBox : MonoBehaviour
         float dragHorizon = Input.GetAxis("Mouse X");
         float dragVertical = Input.GetAxis("Mouse Y");
         Vector3 pos = transform.position;
-        int d_row = row;
-        int d_column = column;
+        int t_row = row;
+        int t_column = column;
 
         //상하
         if (Mathf.Abs(dragVertical) > Mathf.Abs(dragHorizon) && !fix)
@@ -113,10 +137,33 @@ public class CharacterBox : MonoBehaviour
             vertical = 0;
             fix = true;
         }
+
+        DecideDirection(dragVertical, dragHorizon);
+
         Vector3 nowPos = transform.position;
         if (originPos.x + drag_range > nowPos.x + dragHorizon * horizontal && originPos.x - drag_range < nowPos.x + dragHorizon * horizontal &&
             originPos.y + drag_range > nowPos.y + dragVertical * vertical && originPos.y - drag_range < nowPos.y + dragVertical * vertical)
             transform.position += new Vector3(dragHorizon * horizontal, dragVertical * vertical, 0);
+    }
+
+    void DecideDirection(float dragV, float dragH)
+    {
+        if (vertical > 0)
+        {
+            if (dragV > 0)
+                dirV = 1;
+            else if (dragV < 0)
+                dirV = -1;
+            dirH = 0;
+        }
+        else
+        {
+            if (dragH > 0)
+                dirH = 1;
+            else if (dragH < 0)
+                dirH = -1;
+            dirV = 0;
+        }
     }
 
     public void SetOriginPos(Vector3 originPos)
