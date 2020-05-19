@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
     const float start_x = 2.4f;
     const float space = 0.8f;
 
+    const float fade_delay = 0.001f;
+    const float fade_value = 0.1f;
+
     enum CharacterType {Anna, Mirai, Miya, Serika, Shiho, Yuriko};
 
     public GameObject[] characters;
@@ -44,10 +47,14 @@ public class GameManager : MonoBehaviour
 
                 board[i, j] = Instantiate(characters[val], pos, Quaternion.identity);
                 board[i, j].GetComponent<CharacterBox>().SetArr(i, j);
+
+                Color color = board[i, j].GetComponent<SpriteRenderer>().color;
+                board[i, j].GetComponent<SpriteRenderer>().color = new Vector4(color.r, color.g, color.b, 0.0f);
             }
         }
         beStart = false;
         CheckOverlap();
+        StartCoroutine("FadeIn");
     }
 
     
@@ -90,6 +97,8 @@ public class GameManager : MonoBehaviour
 
                     Vector3 pos = new Vector3(j * space - start_x, i * create_y + start_y, 0.0f);
                     board[i, j] = Instantiate(characters[val], pos, Quaternion.identity);
+                    Color color = board[i, j].GetComponent<SpriteRenderer>().color;
+                    board[i, j].GetComponent<SpriteRenderer>().color = new Vector4(color.r, color.g, color.b, 0.0f);
                     board[i, j].GetComponent<CharacterBox>().SetArr(i, j);
                 }
             }
@@ -108,6 +117,21 @@ public class GameManager : MonoBehaviour
         } while ((int)characterType == randCharacter);
 
         return randCharacter;
+    }
+
+    IEnumerator FadeIn()
+    {
+        while (board[6, 6].GetComponent<SpriteRenderer>().color.a != 1.0f)
+        {
+            for (int i = 0; i < height; ++i)
+            {
+                for (int j = 0; j < width; ++j)
+                {
+                    board[i, j].GetComponent<SpriteRenderer>().color += new Color(0.0f, 0.0f, 0.0f, fade_value);
+                }
+                yield return new WaitForSeconds(fade_delay);
+            }
+        }
     }
 
     public GameObject[,] GetCharacterTile()
