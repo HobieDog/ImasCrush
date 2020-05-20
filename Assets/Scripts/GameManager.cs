@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
     GameObject[,] board;
 
     bool beStart = true;
+
+    bool beRefill = false;
     bool beDrop = false;
 
     void Start()
@@ -34,11 +36,18 @@ public class GameManager : MonoBehaviour
             Create();
     }
 
+    void Update()
+    {
+        if (!beRefill)
+            StartCoroutine("Refill");
+    }
+
     public bool IsDropping()
     {
         return beDrop;
     }
 
+    //Create Tile
     void Create()
     {
         for(int i = 0;i < height; i++)
@@ -57,6 +66,9 @@ public class GameManager : MonoBehaviour
     {
         int val = Random.Range(0, 6);
         Vector3 pos = new Vector3(x * space - start_x, y * create_y + start_y, 0.0f);
+
+        board[y, x] = Instantiate(characters[val], pos, Quaternion.identity);
+        board[y, x].GetComponent<CharacterBox>().SetArr(y, x);
 
         if (alphaReset)
         {
@@ -82,7 +94,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    //remove duplicated tile
+    //Overlap tile Check
     void CheckOverlap()
     {
         for (int i = 0; i < height; i++)
@@ -132,7 +144,7 @@ public class GameManager : MonoBehaviour
         }
     }
     
-
+    //Tile Tag Check
     int CheckTagWithEnum(string str, int x, int y)
     {
         CharacterType characterType = (CharacterType)System.Enum.Parse(typeof(CharacterType), str);
@@ -166,7 +178,7 @@ public class GameManager : MonoBehaviour
         return board;
     }
 
-    //Check Tiles
+    //Check Tile & Destroy Tile
     public bool CheckCharacter(int row, int column, int dirV, int dirH, string type)
     {
         Queue<GameObject> queueW = new Queue<GameObject>();
@@ -250,4 +262,40 @@ public class GameManager : MonoBehaviour
         }
         return result1 || result2;
     }
+    
+    IEnumerator Refill()
+    {
+        beRefill = true;
+        bool beEmpty = false;
+
+        while (true)
+        {
+            yield return new WaitForSeconds(time);
+            for (int i = 0; i < 7; ++i)
+            {
+                //If Find Empty Space
+                if (board[6, i] == null)
+                {
+                    // Create New Tile
+                    beEmpty = true;
+                    CreateCharacterTile(i, 6, false);
+                }
+            }
+            // If Don't Find Empty Space
+            if (!beEmpty)
+            {
+                beRefill = false;
+                beDrop = false;
+
+                for (int i = 0; i < width; ++i)
+                {
+                    //Check Overlap Tile
+                    CheckCharacter(6, i, 0, 0, board[6, i].tag);
+                }
+                break;
+            }
+            beEmpty = false;
+        }
+    }
+    
 }

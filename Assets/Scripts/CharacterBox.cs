@@ -95,6 +95,7 @@ public class CharacterBox : MonoBehaviour
             {
                 transform.position = originPos;
                 fix = false;
+                return;
             }
         }
 
@@ -118,6 +119,7 @@ public class CharacterBox : MonoBehaviour
                 {
                     transform.position = originPos;
                     fix = false;
+                    return;
                 }
                 Switching();
             }
