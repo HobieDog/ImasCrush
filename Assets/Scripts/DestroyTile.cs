@@ -5,7 +5,7 @@ using UnityEngine;
 public class DestroyTile : MonoBehaviour
 {
     const float decrese = 0.15f;
-    const float time = 0.1f;
+    const float time = 0.02f;
 
     SpriteRenderer spriteRenderer;
 
@@ -16,7 +16,6 @@ public class DestroyTile : MonoBehaviour
 
     IEnumerator Destroy()
     {
-        Debug.Log("a");
         spriteRenderer.enabled = true;
 
         Color color = spriteRenderer.color;
