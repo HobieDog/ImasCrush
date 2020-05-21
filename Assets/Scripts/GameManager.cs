@@ -16,12 +16,15 @@ public class GameManager : MonoBehaviour
     const float fade_delay = 0.001f;
     const float fade_value = 0.1f;
 
+    const int score_point = 500;
+
     public const float time = 0.2f;
 
     enum CharacterType {Anna, Mirai, Miya, Serika, Shiho, Yuriko};
 
     public GameObject[] characters;
     GameObject[,] board;
+    User user;
 
     bool beStart = true;
 
@@ -30,6 +33,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        user = GetComponent<User>();
         board = new GameObject[height, width];
 
         if (beStart)
@@ -241,6 +245,9 @@ public class GameManager : MonoBehaviour
 
         if (queueW.Count >= 3)
         {
+            //Score Up
+            user.AddScore(score_point * queueW.Count);
+
             while (queueW.Count > 0)
             {
                 queueW.Dequeue().GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
@@ -253,6 +260,9 @@ public class GameManager : MonoBehaviour
             //if tile destroyed result1
             if (result1)
                 queueH.Dequeue();
+
+            //Score Up
+            user.AddScore(score_point * queueH.Count);
 
             while (queueH.Count > 0)
             {
