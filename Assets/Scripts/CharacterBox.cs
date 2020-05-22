@@ -129,6 +129,9 @@ public class CharacterBox : MonoBehaviour
         int t_row = row;
         int t_column = column;
 
+        if (bomb)
+            return;
+
         //상하
         if (Mathf.Abs(dragVertical) > Mathf.Abs(dragHorizon) && !fix)
         {

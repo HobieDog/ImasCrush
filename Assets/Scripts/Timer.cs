@@ -9,11 +9,22 @@ public class Timer : MonoBehaviour
     float time = 60.0f;
 
     Slider slider;
+    GameObject resultPanel;
+    Text resultScore;
+    User user;
 
     void Start()
     {
         slider = GameObject.Find("Canvas").transform.Find("Slider").GetComponent<Slider>();
         slider.maxValue = time;
+
+        resultPanel = GameObject.Find("Canvas").transform.Find("ResultPanel").gameObject;
+        resultPanel.SetActive(false);
+
+        resultScore = GameObject.Find("Canvas").transform.Find("ResultPanel").Find("Score").GetComponent<Text>();
+
+        user = GameObject.Find("GameManager").GetComponent<User>();
+
         StartCoroutine("FixedTimeTimer");
     }
 
@@ -46,5 +57,7 @@ public class Timer : MonoBehaviour
             }
             yield return new WaitForSeconds(sub_time);
         }
+        resultPanel.SetActive(true);
+        resultScore.text = user.score.ToString();
     }
 }

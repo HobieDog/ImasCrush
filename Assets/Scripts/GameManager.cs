@@ -250,9 +250,9 @@ public class GameManager : MonoBehaviour
             //Make Bomb
             if (queueW.Count >= 4)
             {
-                board[row, column + dirH].GetComponent<CharacterBox>().SetColor(255, 255, 255, 255);
-                board[row, column + dirH].GetComponent<CharacterBox>().ActiveBomb();
-                board[row, column + dirH].GetComponent<CharacterBox>().tag = "Bomb";
+                board[row, column - dirH].GetComponent<CharacterBox>().SetColor(255, 255, 255, 255);
+                board[row, column - dirH].GetComponent<CharacterBox>().ActiveBomb();
+                board[row, column - dirH].GetComponent<CharacterBox>().tag = "Bomb";
             }
 
             while (queueW.Count > 0)
@@ -275,9 +275,9 @@ public class GameManager : MonoBehaviour
             //Make Bomb
             if (queueH.Count >= 4)
             {
-                board[row, column + dirV].GetComponent<CharacterBox>().SetColor(255, 255, 255, 255);
-                board[row, column + dirV].GetComponent<CharacterBox>().ActiveBomb();
-                board[row, column + dirV].GetComponent<CharacterBox>().tag = "Bomb";
+                board[row - dirV, column].GetComponent<CharacterBox>().SetColor(255, 255, 255, 255);
+                board[row - dirV, column].GetComponent<CharacterBox>().ActiveBomb();
+                board[row - dirV, column].GetComponent<CharacterBox>().tag = "Bomb";
             }
             
             while

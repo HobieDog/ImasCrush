@@ -6,7 +6,7 @@ using UnityEngine;
 public class User : MonoBehaviour
 {
     const int score_point = 200;
-    int score = 0;
+    public int score = 0;
 
     GameManager gameManager;
     Text scoreText;
