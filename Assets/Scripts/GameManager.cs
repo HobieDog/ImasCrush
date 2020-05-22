@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    const int width = 7;
-    const int height = 7;
+    public const int width = 7;
+    public const int height = 7;
 
     const float create_delay = 0.2f;
     const float create_y = 0.8f;
@@ -82,7 +82,7 @@ public class GameManager : MonoBehaviour
     //Fade In Effect
     IEnumerator FadeIn()
     {
-        while (board[6, 6].GetComponent<SpriteRenderer>().color.a != 1.0f)
+        while (board[6, 6].GetComponent<SpriteRenderer>().color.a < 1.0f)
         {
             for (int i = 0; i < height; ++i)
             {
@@ -240,18 +240,28 @@ public class GameManager : MonoBehaviour
             else
                 D = true;
         }
+        
 
         if (queueW.Count >= 3)
         {
             //Score Up
             user.AddScore(queueW.Count);
 
-            while (queueW.Count > 0)
+            //Make Bomb
+            if (queueW.Count >= 4)
             {
-                queueW.Dequeue().GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
+                board[row, column + dirH].GetComponent<CharacterBox>().SetColor(255, 255, 255, 255);
+                board[row, column + dirH].GetComponent<CharacterBox>().ActiveBomb();
+                board[row, column + dirH].GetComponent<CharacterBox>().tag = "Bomb";
             }
-            result1 = true;
-        }
+
+            while (queueW.Count > 0)
+                {
+                    queueW.Dequeue().GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
+                }
+             result1 = true;
+         }
+            
 
         if (queueH.Count >= 3)
         {
@@ -262,7 +272,16 @@ public class GameManager : MonoBehaviour
             //Score Up
             user.AddScore(queueH.Count);
 
-            while (queueH.Count > 0)
+            //Make Bomb
+            if (queueH.Count >= 4)
+            {
+                board[row, column + dirV].GetComponent<CharacterBox>().SetColor(255, 255, 255, 255);
+                board[row, column + dirV].GetComponent<CharacterBox>().ActiveBomb();
+                board[row, column + dirV].GetComponent<CharacterBox>().tag = "Bomb";
+            }
+            
+            while
+                (queueH.Count > 0)
             {
                 queueH.Dequeue().GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
             }
@@ -270,7 +289,7 @@ public class GameManager : MonoBehaviour
         }
         return result1 || result2;
     }
-    
+
     IEnumerator Refill()
     {
         beRefill = true;

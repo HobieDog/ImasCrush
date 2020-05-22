@@ -14,16 +14,14 @@ public class Timer : MonoBehaviour
     {
         slider = GameObject.Find("Canvas").transform.Find("Slider").GetComponent<Slider>();
         slider.maxValue = time;
-
         StartCoroutine("FixedTimeTimer");
     }
 
     IEnumerator FixedTimeTimer()
     {
-        Color imageColor = slider.transform.Find("Fill Area").Find("Fill").
-                    GetComponent<Image>().color;
+        Color imageColor = slider.transform.Find("Fill Area").Find("Fill").GetComponent<Image>().color;
 
-        // 시간에 따른 TimeBar의 색깔을 달리하여 플레이어에게 알림
+        // Change TimeBar Color
         while (time > 0)
         {
             time -= sub_time;
@@ -46,7 +44,6 @@ public class Timer : MonoBehaviour
                     GetComponent<Image>().color = new Color(1.0f, 0.5f, 0);
                     break;
             }
-
             yield return new WaitForSeconds(sub_time);
         }
     }

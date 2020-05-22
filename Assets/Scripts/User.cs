@@ -5,21 +5,17 @@ using UnityEngine;
 
 public class User : MonoBehaviour
 {
-    const int score_point = 500;
+    const int score_point = 200;
+    int score = 0;
 
     GameManager gameManager;
     Text scoreText;
-    int score;
 
     private void Awake()
     {
-        scoreText = GameObject.Find("Canvas").transform.Find("ScoreBar").Find("Score").GetComponent<Text>();
+        scoreText = GameObject.Find("Canvas").transform.Find("Score").GetComponent<Text>();
         gameManager = GetComponent<GameManager>();
-    }
-
-    private void FixedUpdate()
-    {
-        
+        scoreText.text = score.ToString();
     }
 
     public void AddScore(int val)

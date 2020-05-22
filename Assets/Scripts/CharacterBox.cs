@@ -15,6 +15,7 @@ public class CharacterBox : MonoBehaviour
     SpriteRenderer spriteRenderer;
     BoxCollider2D boxCollider;
     Vector3 originPos;
+    User user;
 
     int dirV = 0;
     int dirH = 0;
@@ -23,11 +24,13 @@ public class CharacterBox : MonoBehaviour
     float horizontal = 0;
     bool beStart = false;
     bool beDrop = false;
+    bool bomb = false;
     bool fix = false;
 
     void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        user = GameObject.Find("GameManager").GetComponent<User>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
         originPos = transform.position;
@@ -40,27 +43,6 @@ public class CharacterBox : MonoBehaviour
             StartCoroutine("Drop");
         }
             
-    }
-
-    void Switching()
-    {
-        GameObject ChangeTile = gameManager.GetCharacterTile()[row + dirV, column + dirH];
-
-        //Change Tile
-        transform.position = ChangeTile.GetComponent<CharacterBox>().GetOriginPos();
-        ChangeTile.transform.position = originPos;
-
-        //Tiles OriginPos Reset
-        originPos = transform.position;
-        ChangeTile.GetComponent<CharacterBox>().SetOriginPos(ChangeTile.transform.position);
-
-        //Change Board Array
-        GameObject tempObj = gameManager.GetCharacterTile()[row, column];
-        gameManager.GetCharacterTile()[row, column] = ChangeTile;
-        gameManager.GetCharacterTile()[row + dirV, column + dirH] = tempObj;
-
-        gameManager.GetCharacterTile()[row, column].GetComponent<CharacterBox>().SetArr(row, column);
-        gameManager.GetCharacterTile()[row + dirV, column + dirH].GetComponent<CharacterBox>().SetArr(row + dirV, column + dirH);
     }
 
     private void OnMouseUp()
@@ -133,6 +115,12 @@ public class CharacterBox : MonoBehaviour
         transform.position = originPos;
     }
 
+    private void OnMouseDown()
+    {
+        if (bomb)
+            Bomb();
+    }
+
     private void OnMouseDrag()
     {
         float dragHorizon = Input.GetAxis("Mouse X");
@@ -164,6 +152,29 @@ public class CharacterBox : MonoBehaviour
             transform.position += new Vector3(dragHorizon * horizontal, dragVertical * vertical, 0);
     }
 
+    //Switch Tile
+    void Switching()
+    {
+        GameObject ChangeTile = gameManager.GetCharacterTile()[row + dirV, column + dirH];
+
+        //Change Tile
+        transform.position = ChangeTile.GetComponent<CharacterBox>().GetOriginPos();
+        ChangeTile.transform.position = originPos;
+
+        //Tiles OriginPos Reset
+        originPos = transform.position;
+        ChangeTile.GetComponent<CharacterBox>().SetOriginPos(ChangeTile.transform.position);
+
+        //Change Board Array
+        GameObject tempObj = gameManager.GetCharacterTile()[row, column];
+        gameManager.GetCharacterTile()[row, column] = ChangeTile;
+        gameManager.GetCharacterTile()[row + dirV, column + dirH] = tempObj;
+
+        gameManager.GetCharacterTile()[row, column].GetComponent<CharacterBox>().SetArr(row, column);
+        gameManager.GetCharacterTile()[row + dirV, column + dirH].GetComponent<CharacterBox>().SetArr(row + dirV, column + dirH);
+    }
+
+    //Drag Direction Check
     void DecideDirection(float dragV, float dragH)
     {
         if (vertical > 0)
@@ -242,5 +253,53 @@ public class CharacterBox : MonoBehaviour
 
         transform.position = originPos;
         beStart = false;
+    }
+
+    public void SetColor(float r, float g, float b, float a)
+    {
+        Color color = new Color(r, g, b, a);
+        GetComponent<SpriteRenderer>().color = color;
+    }
+
+    public void ActiveBomb()
+    {
+        bomb = true;
+        SetSpriteBomb();
+    }
+
+    public void SetSpriteBomb()
+    {
+        spriteRenderer.sprite = Resources.Load<Sprite>("bomb");
+    }
+
+    void Bomb()
+    {
+        int cnt = 0;
+
+        for (int i = 1; i < GameManager.width; ++i)
+        {
+            if (column + i < GameManager.width && gameManager.GetCharacterTile()[row, column + i])
+            {
+                cnt++;
+                gameManager.GetCharacterTile()[row, column + i].GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
+            }
+            if (column - i >= 0 && gameManager.GetCharacterTile()[row, column - i])
+            {
+                cnt++;
+                gameManager.GetCharacterTile()[row, column - i].GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
+            }
+            if (row + i < GameManager.height && gameManager.GetCharacterTile()[row + i, column])
+            {
+                cnt++;
+                gameManager.GetCharacterTile()[row + i, column].GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
+            }
+            if (row - i >= 0 && gameManager.GetCharacterTile()[row - i, column])
+            {
+                cnt++;
+                gameManager.GetCharacterTile()[row - i, column].GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
+            }
+        }
+        user.AddScore(cnt);
+        gameManager.GetCharacterTile()[row, column].GetComponentInChildren<DestroyTile>().StartCoroutine("Destroy");
     }
 }
