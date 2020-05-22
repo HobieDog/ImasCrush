@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class User : MonoBehaviour
 {
-    const int score_up = 25;
+    const int score_point = 500;
 
     GameManager gameManager;
     Text scoreText;
@@ -19,11 +19,12 @@ public class User : MonoBehaviour
 
     private void FixedUpdate()
     {
-        scoreText.text = score.ToString();
+        
     }
 
     public void AddScore(int val)
     {
-        score += val;
+        score += score_point * val;
+        scoreText.text = score.ToString();
     }
 }

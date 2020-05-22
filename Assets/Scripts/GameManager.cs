@@ -16,8 +16,6 @@ public class GameManager : MonoBehaviour
     const float fade_delay = 0.001f;
     const float fade_value = 0.1f;
 
-    const int score_point = 500;
-
     public const float time = 0.2f;
 
     enum CharacterType {Anna, Mirai, Miya, Serika, Shiho, Yuriko};
@@ -246,7 +244,7 @@ public class GameManager : MonoBehaviour
         if (queueW.Count >= 3)
         {
             //Score Up
-            user.AddScore(score_point * queueW.Count);
+            user.AddScore(queueW.Count);
 
             while (queueW.Count > 0)
             {
@@ -262,7 +260,7 @@ public class GameManager : MonoBehaviour
                 queueH.Dequeue();
 
             //Score Up
-            user.AddScore(score_point * queueH.Count);
+            user.AddScore(queueH.Count);
 
             while (queueH.Count > 0)
             {
